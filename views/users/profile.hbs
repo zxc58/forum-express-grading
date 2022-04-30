@@ -11,16 +11,58 @@
   <br/>
 </div>
 <!--comments-->
-
-<div class="card">
-  <div class="card-header">
-    Comments
-  </div>
-  <div class="card-body overflow-auto" style="height:180px">
-    {{#each user.Comments}}
-    <a href="/restaurants/{{this.Restaurant.id}}#comment{{this.id}}">
-      <img src="{{this.Restaurant.image}}" style="max-height:75px">
-    </a>
-    {{/each}}
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card border border-success">
+        <div class="card-header">
+          Followings
+        </div>
+        <div class="card-body overflow-auto" style="height:180px">
+        {{#each user.Followings}}
+          <img src="{{this.image}}" style="height:75px;width:75px" alt="{{this.name}}" title="{{this.name}}">
+        {{/each}}
+        </div>
+      </div>
+      <br>
+      <div class="card border border-success">
+        <div class="card-header">
+          Followers
+        </div>
+        <div class="card-body overflow-auto" style="height:180px">
+        {{#each user.Followers}}
+          <img src="{{this.image}}" style="height:75px;width:75px" alt="{{this.name}}" title="{{this.name}}">
+        {{/each}}
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card border border-success">
+        <div class="card-header">
+          Comments
+        </div>
+        <div class="card-body overflow-auto" style="height:280px">
+          {{#each user.Comments}}
+          <a href="/restaurants/{{this.Restaurant.id}}#comment{{this.id}}">
+            <img src="{{this.Restaurant.image}}" style="max-height:75px">
+          </a>
+          {{/each}}
+        </div>
+      </div>
+      <br/>
+      <div class="card border border-success">
+        <div class="card-header">
+          Favorite Restaurants
+        </div>
+        <div class="card-body overflow-auto" style="height:200px">
+          {{#each user.FavoritedRestaurants}}
+          <a href="/restaurants/{{this.id}}">
+            <img src="{{this.image}}" style="max-height:75px">
+          </a>
+          {{/each}}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+

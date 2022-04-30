@@ -42,10 +42,28 @@ const userController = {
     const paramsId = parseInt(req.params.id)
     if (getUser(req).id === paramsId) {
       return User.findByPk(paramsId, {
-        include: { model: Comment, include: { model: Restaurant } }
+        include: [
+          { model: Comment, include: { model: Restaurant, attributes: ['id', 'name', 'image'] } },
+          { model: Restaurant, as: 'FavoritedRestaurants', attributes: ['id', 'name', 'image'] },
+          { model: User, as: 'Followers', attributes: ['id', 'name', 'image'] },
+          { model: User, as: 'Followings', attributes: ['id', 'name', 'image'] }
+        ]
       })
         .then(user => {
-          res.render('users/profile', { user: user.toJSON() })
+          const resultData = user.toJSON()
+          const newComments = []
+          console.log(resultData.Comments.length)
+          for (; resultData.Comments.length > 0;) {
+            newComments.unshift(resultData.Comments.shift())
+            for (let j = 0; j < resultData.Comments.length; j++) {
+              if (resultData.Comments[j].restaurantId === newComments[0].restaurantId) {
+                resultData.Comments.splice(j, 1)
+                j--
+              }
+            }
+          }
+          resultData.Comments = newComments
+          res.render('users/profile', { user: resultData })
         })
         .catch(err => next(err))
     }
@@ -171,6 +189,7 @@ const userController = {
   },
   addFollowing: (req, res, next) => {
     const { userId } = req.params
+    if (parseInt(userId) === req.user.id) next(new Error('cannot follow yourself'))
     Promise.all([
       User.findByPk(userId),
       Followship.findOne({
