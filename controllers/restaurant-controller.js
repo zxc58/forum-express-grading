@@ -1,4 +1,4 @@
-const { Restaurant, Category, Comment, User } = require('../models')
+const { Restaurant, Category, Comment, User, sequelize } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const { getUser } = require('../helpers/auth-helpers')
 //
@@ -101,14 +101,27 @@ const restaurantController = {
     const favoritedRestaurants = getUser(req)?.FavoritedRestaurants ? getUser(req).FavoritedRestaurants : []
     const sliceNumber = 10
     return Restaurant.findAll({
-      include: { model: User, as: 'FavoritedUsers' }
+      include: {
+        model: User,
+        as: 'FavoritedUsers',
+        attributes: [
+          'id'
+        ],
+        duplicating: false
+      },
+      attributes: [
+        'id', 'name', 'image', 'description',
+        [sequelize.fn('COUNT', sequelize.col('FavoritedUsers.id')), 'favoritedCount']
+      ],
+      group: 'id',
+      order: [[sequelize.col('favoritedCount'), 'DESC']],
+      limit: sliceNumber
     })
       .then(restaurants => {
         const resultData = restaurants.map(restaurant => ({
           ...restaurant.toJSON(),
-          favoritedCount: restaurant.FavoritedUsers.length,
           isFavorited: favoritedRestaurants.some(favoriteRestaurant => favoriteRestaurant.id === restaurant.id)
-        })).sort((a, b) => b.favoritedCount - a.favoritedCount).slice(0, sliceNumber)
+        }))
         res.render('top-restaurants', { restaurants: resultData })
       })
       .catch(err => next(err))
