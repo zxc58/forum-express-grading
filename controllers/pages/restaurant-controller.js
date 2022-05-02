@@ -1,6 +1,6 @@
-const { Restaurant, Category, Comment, User, sequelize } = require('../models')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
-const { getUser } = require('../helpers/auth-helpers')
+const { Restaurant, Category, Comment, User, sequelize } = require('../../models')
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
+const { getUser } = require('../../helpers/auth-helpers')
 //
 const restaurantController = {
   getRestaurants: (req, res, next) => {

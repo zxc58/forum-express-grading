@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const restController = require('../../controllers/restaurant-controller')
+//
+const restController = require('../../../controllers/pages/restaurant-controller')
 //
 router.get('/top', restController.getTopRestaurants)
 router.get('/feeds', restController.getFeeds)

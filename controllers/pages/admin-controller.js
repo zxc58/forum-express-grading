@@ -1,5 +1,5 @@
-const { Restaurant, User, Category } = require('../models')
-const { imgurFileHandler } = require('../helpers/file-helpers')
+const { Restaurant, User, Category } = require('../../models')
+const { imgurFileHandler } = require('../../helpers/file-helpers')
 
 //
 const adminController = {
@@ -115,7 +115,7 @@ const adminController = {
         if (!user) {
           throw new Error('使用者不存在')
         } else if (user.email === 'root@example.com') {
-          require('../middleware/error-handler').generalErrorHandler('禁止變更 root 權限', req, res, next)
+          require('../../middleware/error-handler').generalErrorHandler('禁止變更 root 權限', req, res, next)
           // throw '禁止變更 root 權限'
           // next(new Error('禁止變更 root 權限'))
           // next('禁止變更 root 權限')
