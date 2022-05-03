@@ -19,6 +19,23 @@ const adminController = {
       })
       .then(deletedRestaurant => cb(null, { restaurant: deletedRestaurant }))
       .catch(err => cb(err))
+  },
+  postRestaurant: (req, cb) => {
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    if (!name) throw new Error('Restaurant name is required!')
+    const { file } = req
+    imgurFileHandler(file)
+      .then(filePath => Restaurant.create({
+        name,
+        categoryId,
+        tel,
+        address,
+        openingHours,
+        description,
+        image: filePath || null
+      }))
+      .then(newRestaurant => cb(null, { restaurants: newRestaurant }))
+      .catch(err => cb(err))
   }
 }
 //

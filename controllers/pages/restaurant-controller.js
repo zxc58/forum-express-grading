@@ -64,8 +64,8 @@ const restaurantController = {
       .catch(err => next(err))
   },
   getTopRestaurants: (req, res, next) => {
-    const favoritedRestaurants = getUser(req)?.FavoritedRestaurants ? getUser(req).FavoritedRestaurants : []
-    const sliceNumber = 10
+    const limit = 10
+    const literalString = process.env.NODE_ENV === 'production' ? `IF ("FavoritedUsers"."id"-${getUser(req).id} ,0,1)` : 'IF (`FavoritedUsers`.`id`-' + getUser(req).id + ',0,1)'
     return Restaurant.findAll({
       include: {
         model: User,
@@ -77,18 +77,17 @@ const restaurantController = {
       },
       attributes: [
         'id', 'name', 'image', 'description',
-        [sequelize.fn('COUNT', sequelize.col('FavoritedUsers.id')), 'favoritedCount']
+        [sequelize.fn('COUNT', sequelize.col('FavoritedUsers.id')), 'favoritedCount'],
+        [sequelize.fn('IF', sequelize.col('FavoritedUsers.id'), sequelize.fn('MAX', sequelize.literal(literalString)), 0), 'isFavorited']
       ],
-      group: 'id',
+      group: 'Restaurant.id',
       order: [[sequelize.col('favoritedCount'), 'DESC']],
-      limit: sliceNumber
+      limit: limit,
+      raw: true,
+      nest: true
     })
       .then(restaurants => {
-        const resultData = restaurants.map(restaurant => ({
-          ...restaurant.toJSON(),
-          isFavorited: favoritedRestaurants.some(favoriteRestaurant => favoriteRestaurant.id === restaurant.id)
-        }))
-        res.render('top-restaurants', { restaurants: resultData })
+        res.render('top-restaurants', { restaurants })
       })
       .catch(err => next(err))
   }
