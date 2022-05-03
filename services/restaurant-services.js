@@ -2,7 +2,7 @@ const { Restaurant, Category } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 //
 const restaurantServices = {
-  getRestaurants: (req, callback) => {
+  getRestaurants: (req, cb) => {
     const DEFAULT_LIMIT = 9
     const categoryId = Number(req.query.categoryId) || ''
     const page = Number(req.query.page) || 1
@@ -22,7 +22,7 @@ const restaurantServices = {
       Category.findAll({ raw: true })
     ])
       .then(([restaurants, categories]) => {
-        const favoritedRestaurantsId = req?.user.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(fr => fr.id) : []
+        const favoritedRestaurantsId = req.user?.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(fr => fr.id) : []
         const likedRestaurantsId = req.user?.LikedRestaurants ? req.user.LikedRestaurants.map(lr => lr.id) : []
         const data = restaurants.rows.map(r => ({
           ...r,
@@ -30,14 +30,14 @@ const restaurantServices = {
           isFavorited: favoritedRestaurantsId.includes(r.id),
           isLiked: likedRestaurantsId.includes(r.id)
         }))
-        return callback(null, {
+        return cb(null, {
           restaurants: data,
           categories,
           categoryId,
           pagination: getPagination(limit, page, restaurants.count)
         })
       })
-      .catch(err => callback(err))
+      .catch(err => cb(err))
   }
 }
 //
