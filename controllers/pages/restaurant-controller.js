@@ -64,8 +64,12 @@ const restaurantController = {
       .catch(err => next(err))
   },
   getTopRestaurants: (req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+      req.flash('error_messages', '功功能未完成(postgresql)')
+      return res.redirect('/')
+    }
     const limit = 10
-    const literalString = process.env.NODE_ENV === 'production' ? `IF ("FavoritedUsers"."id"-${getUser(req).id} ,0,1)` : 'IF (`FavoritedUsers`.`id`-' + getUser(req).id + ',0,1)'
+    const literalString = 'IF (`FavoritedUsers`.`id`-' + getUser(req).id + ',0,1)'
     return Restaurant.findAll({
       include: {
         model: User,
