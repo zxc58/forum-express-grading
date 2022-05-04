@@ -65,7 +65,7 @@ const restaurantController = {
   },
   getTopRestaurants: (req, res, next) => {
     if (process.env.NODE_ENV === 'production') {
-      req.flash('error_messages', '功功能未完成(postgresql)')
+      req.flash('error_messages', '功能未完成(postgresql)')
       return res.redirect('/')
     }
     const limit = 10
