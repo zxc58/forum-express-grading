@@ -1,6 +1,7 @@
 const { Restaurant, Category, Comment, User, sequelize } = require('../../models')
 const { getUser } = require('../../helpers/auth-helpers')
 const restaurantServices = require('../../services/restaurant-services')
+const { topRestaurantsQuery } = require('../../helpers/sql-helpers')
 //
 const restaurantController = {
   getRestaurants: (req, res, next) => {
@@ -64,35 +65,12 @@ const restaurantController = {
       .catch(err => next(err))
   },
   getTopRestaurants: (req, res, next) => {
-    if (process.env.NODE_ENV === 'production') {
-      req.flash('error_messages', '功能未完成(postgresql)')
-      return res.redirect('/')
-    }
     const limit = 10
-    const literalString = 'IF (`FavoritedUsers`.`id`-' + getUser(req).id + ',0,1)'
-    return Restaurant.findAll({
-      include: {
-        model: User,
-        as: 'FavoritedUsers',
-        attributes: [
-          'id'
-        ],
-        duplicating: false
-      },
-      attributes: [
-        'id', 'name', 'image', 'description',
-        [sequelize.fn('COUNT', sequelize.col('FavoritedUsers.id')), 'favoritedCount'],
-        [sequelize.fn('IF', sequelize.col('FavoritedUsers.id'), sequelize.fn('MAX', sequelize.literal(literalString)), 0), 'isFavorited']
-      ],
-      group: 'Restaurant.id',
-      order: [[sequelize.col('favoritedCount'), 'DESC']],
-      limit: limit,
-      raw: true,
-      nest: true
-    })
-      .then(restaurants => {
-        res.render('top-restaurants', { restaurants })
-      })
+    const query = process.env.NODE_ENV === 'production'
+      ? topRestaurantsQuery(getUser(req).id, limit, 'PostgreSQL')
+      : topRestaurantsQuery(getUser(req).id, limit, 'MySQL')
+    return sequelize.query(query)
+      .then(([restaurants, metadata]) => res.render('top-restaurants', { restaurants }))
       .catch(err => next(err))
   }
 }
