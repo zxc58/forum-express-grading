@@ -1,7 +1,6 @@
 const { Restaurant, Category, Comment, User, sequelize } = require('../../models')
 const { getUser } = require('../../helpers/auth-helpers')
 const restaurantServices = require('../../services/restaurant-services')
-const { topRestaurantsQuery } = require('../../helpers/sql-helpers')
 //
 const restaurantController = {
   getRestaurants: (req, res, next) => {
