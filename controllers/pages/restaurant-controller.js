@@ -64,25 +64,20 @@ const restaurantController = {
       .catch(err => next(err))
   },
   getTopRestaurants: (req, res, next) => {
-    if (process.env.NODE_ENV === 'production') {
-      req.flash('error_messages', '功能未完成(postgresql)')
-      return res.redirect('/')
-    }
     const limit = 10
-    const literalString = 'IF (`FavoritedUsers`.`id`-' + getUser(req).id + ',0,1)'
+    const literalString = process.env.NODE_ENV === 'production' ? `CASE "FavoritedUsers"."id"- ${getUser(req).id} WHEN 0 THEN 1 ELSE 0 END` : 'CASE `FavoritedUsers`.`id`- ' + getUser(req).id + ' WHEN 0 THEN 1 ELSE 0 END'
     return Restaurant.findAll({
       include: {
         model: User,
         as: 'FavoritedUsers',
-        attributes: [
-          'id'
-        ],
-        duplicating: false
+        attributes: [],
+        duplicating: false,
+        through: { attributes: [] }
       },
       attributes: [
         'id', 'name', 'image', 'description',
         [sequelize.fn('COUNT', sequelize.col('FavoritedUsers.id')), 'favoritedCount'],
-        [sequelize.fn('IF', sequelize.col('FavoritedUsers.id'), sequelize.fn('MAX', sequelize.literal(literalString)), 0), 'isFavorited']
+        [sequelize.fn('MAX', sequelize.literal(literalString)), 'isFavorited']
       ],
       group: 'Restaurant.id',
       order: [[sequelize.col('favoritedCount'), 'DESC']],
